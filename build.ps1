@@ -1,5 +1,5 @@
 param(
-    [string]$Cxx = "x86_64-w64-mingw32-g++",
+    [string]$Cxx = "",
     [string]$WindRes = "",
     [string]$MakeNsis = ""
 )
@@ -11,17 +11,18 @@ $BuildDirectory = Join-Path $ProjectRoot "build"
 
 New-Item -ItemType Directory -Force -Path $BuildDirectory | Out-Null
 
+
 function Find-Executable {
     param(
         [string[]]$Names,
-        [string[]]$Paths = @()
+        [string[]]$Paths
     )
 
     foreach ($name in $Names) {
         if ($name) {
-            $command = Get-Command $name -ErrorAction SilentlyContinue
-            if ($command) {
-                return $command.Source
+            $cmd = Get-Command $name -ErrorAction SilentlyContinue
+            if ($cmd) {
+                return $cmd.Source
             }
         }
     }
@@ -35,42 +36,73 @@ function Find-Executable {
     return $null
 }
 
-$CxxTool = Find-Executable @(
-    $Cxx,
-    "x86_64-w64-mingw32-g++",
-    "g++"
-)
+
+# Detect C++ compiler
+$CxxTool = Find-Executable `
+    -Names @(
+        $Cxx,
+        "x86_64-w64-mingw32-g++",
+        "g++"
+    ) `
+    -Paths @()
 
 if (-not $CxxTool) {
-    throw "C++ compiler not found"
+    throw "C++ compiler not found. Install MinGW."
 }
 
-$WindResTool = Find-Executable @(
-    $WindRes,
-    "x86_64-w64-mingw32-windres",
-    "windres"
-)
+
+# Detect resource compiler
+$WindResTool = Find-Executable `
+    -Names @(
+        $WindRes,
+        "x86_64-w64-mingw32-windres",
+        "windres"
+    ) `
+    -Paths @()
 
 if (-not $WindResTool) {
-    throw "Resource compiler not found"
+    throw "Resource compiler not found. Install MinGW binutils."
 }
 
-$NsisTool = Find-Executable @(
-    $MakeNsis,
-    "makensis"
-) @(
-    "C:\Program Files (x86)\NSIS\makensis.exe",
-    "C:\Program Files\NSIS\makensis.exe"
-)
+
+# Detect NSIS installer compiler
+$NsisTool = Find-Executable `
+    -Names @(
+        $MakeNsis,
+        "makensis"
+    ) `
+    -Paths @(
+        "C:\Program Files (x86)\NSIS\makensis.exe",
+        "C:\Program Files\NSIS\makensis.exe",
+        "C:\ProgramData\chocolatey\bin\makensis.exe"
+    )
+
 
 if (-not $NsisTool) {
-    throw "NSIS compiler not found"
+
+    Write-Host "Searching Chocolatey NSIS installation..."
+
+    $NsisTool = Get-ChildItem `
+        "C:\ProgramData\chocolatey\lib" `
+        -Filter "makensis.exe" `
+        -Recurse `
+        -ErrorAction SilentlyContinue |
+        Select-Object -First 1 |
+        ForEach-Object { $_.FullName }
 }
+
+
+if (-not $NsisTool) {
+    throw "NSIS compiler not found. Install NSIS."
+}
+
 
 Write-Host "Compiler: $CxxTool"
 Write-Host "Resource compiler: $WindResTool"
 Write-Host "NSIS compiler: $NsisTool"
 
+
+# Compile Windows resource
 & $WindResTool `
     (Join-Path $ProjectRoot "src\PowerShellGuardian.rc") `
     -O coff `
@@ -80,6 +112,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "Resource compilation failed"
 }
 
+
 $CommonFlags = @(
     "-std=c++17",
     "-O2",
@@ -88,6 +121,7 @@ $CommonFlags = @(
     "-static-libgcc",
     "-static-libstdc++"
 )
+
 
 $Libraries = @(
     "-lws2_32",
@@ -100,6 +134,8 @@ $Libraries = @(
     "-lole32"
 )
 
+
+# Build main application
 & $CxxTool `
     @CommonFlags `
     "-mwindows" `
@@ -113,30 +149,38 @@ if ($LASTEXITCODE -ne 0) {
     throw "PowerShellGuardian.exe build failed"
 }
 
+
+# Build console bridge
 & $CxxTool `
     @CommonFlags `
     "-DMOMENTUM_BRIDGE_CONSOLE" `
     "-mconsole" `
     (Join-Path $ProjectRoot "src\PowerShellGuardian.cpp") `
     "-o" `
-    (JoinPath $BuildDirectory "PowerShellGuardianBridge.exe") `
+    (Join-Path $BuildDirectory "PowerShellGuardianBridge.exe") `
     @Libraries
 
 if ($LASTEXITCODE -ne 0) {
     throw "PowerShellGuardianBridge.exe build failed"
 }
 
+
+# Build installer
 Push-Location (Join-Path $ProjectRoot "installer")
 
 try {
+
     & $NsisTool "PowerShellGuardian.nsi"
 
     if ($LASTEXITCODE -ne 0) {
         throw "Installer build failed"
     }
+
 }
 finally {
     Pop-Location
 }
 
+
+Write-Host ""
 Write-Host "PowerShell Guardian build completed successfully" -ForegroundColor Green
