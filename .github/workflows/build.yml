@@ -1,0 +1,38 @@
+name: Build PowerShell Guardian
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        shell: pwsh
+        run: |
+          pwsh --version
+
+      - name: Run build script
+        shell: pwsh
+        run: |
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+          .\build.ps1
+
+      - name: Run Python security tests
+        shell: pwsh
+        run: |
+          python --version
+          python tests/security_contract_test.py
+
+      - name: Build completed
+        run: echo "PowerShell Guardian build completed successfully."
