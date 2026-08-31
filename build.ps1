@@ -1,7 +1,7 @@
 param(
     [string]$Cxx = "x86_64-w64-mingw32-g++",
     [string]$WindRes = "",
-    [string]$MakeNsis = "makensis"
+    [string]$MakeNsis = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,38 +11,83 @@ $BuildDirectory = Join-Path $ProjectRoot "build"
 
 New-Item -ItemType Directory -Force -Path $BuildDirectory | Out-Null
 
-function Find-Tool($Preferred, $Fallbacks) {
-    if ($Preferred -and (Get-Command $Preferred -ErrorAction SilentlyContinue)) {
-        return $Preferred
-    }
+function Find-Executable {
+    param(
+        [string[]]$Names,
+        [string[]]$Paths = @()
+    )
 
-    foreach ($tool in $Fallbacks) {
-        if (Get-Command $tool -ErrorAction SilentlyContinue) {
-            return $tool
+    foreach ($name in $Names) {
+        if ($name) {
+            $command = Get-Command $name -ErrorAction SilentlyContinue
+            if ($command) {
+                return $command.Source
+            }
         }
     }
 
-    throw "Required build tool not found: $($Fallbacks -join ', ')"
+    foreach ($path in $Paths) {
+        if (Test-Path $path) {
+            return $path
+        }
+    }
+
+    return $null
 }
 
-# Support both local MinGW installations and GitHub Actions runners
-$Cxx = Find-Tool $Cxx @(
+$CxxTool = Find-Executable @(
+    $Cxx,
     "x86_64-w64-mingw32-g++",
     "g++"
 )
 
-$WindRes = Find-Tool $WindRes @(
+if (-not $CxxTool) {
+    throw "C++ compiler not found"
+}
+
+$WindResTool = Find-Executable @(
+    $WindRes,
     "x86_64-w64-mingw32-windres",
     "windres"
 )
 
-$MakeNsis = Find-Tool $MakeNsis @(
+if (-not $WindResTool) {
+    throw "Resource compiler not found"
+}
+
+$NsisTool = Find-Executable @(
+    $MakeNsis,
     "makensis"
+) @(
+    "C:\Program Files (x86)\NSIS\makensis.exe",
+    "C:\Program Files\NSIS\makensis.exe"
 )
 
-Write-Host "Compiler: $Cxx"
-Write-Host "Resource compiler: $WindRes"
-Write-Host "NSIS: $MakeNsis"
+if (-not $NsisTool) {
+    throw "NSIS compiler not found"
+}
+
+Write-Host "Compiler: $CxxTool"
+Write-Host "Resource compiler: $WindResTool"
+Write-Host "NSIS compiler: $NsisTool"
+
+& $WindResTool `
+    (Join-Path $ProjectRoot "src\PowerShellGuardian.rc") `
+    -O coff `
+    -o (Join-Path $BuildDirectory "PowerShellGuardian.res")
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Resource compilation failed"
+}
+
+$CommonFlags = @(
+    "-std=c++17",
+    "-O2",
+    "-municode",
+    "-static",
+    "-static-libgcc",
+    "-static-libstdc++"
+)
 
 $Libraries = @(
     "-lws2_32",
@@ -55,28 +100,8 @@ $Libraries = @(
     "-lole32"
 )
 
-& $WindRes `
-    (Join-Path $ProjectRoot "src\PowerShellGuardian.rc") `
-    "-O" `
-    "coff" `
-    "-o" `
-    (Join-Path $BuildDirectory "PowerShellGuardian.res")
-
-if ($LASTEXITCODE -ne 0) {
-    throw "windres failed"
-}
-
-$Common = @(
-    "-std=c++17",
-    "-O2",
-    "-municode",
-    "-static",
-    "-static-libgcc",
-    "-static-libstdc++"
-)
-
-& $Cxx `
-    @Common `
+& $CxxTool `
+    @CommonFlags `
     "-mwindows" `
     (Join-Path $ProjectRoot "src\PowerShellGuardian.cpp") `
     (Join-Path $BuildDirectory "PowerShellGuardian.res") `
@@ -88,13 +113,13 @@ if ($LASTEXITCODE -ne 0) {
     throw "PowerShellGuardian.exe build failed"
 }
 
-& $Cxx `
-    @Common `
+& $CxxTool `
+    @CommonFlags `
     "-DMOMENTUM_BRIDGE_CONSOLE" `
     "-mconsole" `
     (Join-Path $ProjectRoot "src\PowerShellGuardian.cpp") `
     "-o" `
-    (Join-Path $BuildDirectory "PowerShellGuardianBridge.exe") `
+    (JoinPath $BuildDirectory "PowerShellGuardianBridge.exe") `
     @Libraries
 
 if ($LASTEXITCODE -ne 0) {
@@ -104,18 +129,14 @@ if ($LASTEXITCODE -ne 0) {
 Push-Location (Join-Path $ProjectRoot "installer")
 
 try {
-    & $MakeNsis "PowerShellGuardian.nsi"
+    & $NsisTool "PowerShellGuardian.nsi"
 
     if ($LASTEXITCODE -ne 0) {
-        throw "PowerShellGuardianSetup.exe build failed"
+        throw "Installer build failed"
     }
 }
 finally {
     Pop-Location
 }
 
-Write-Host "Build completed successfully:" -ForegroundColor Green
-
-Get-Item `
-    (Join-Path $BuildDirectory "PowerShellGuardian.exe"), `
-    (Join-Path $BuildDirectory "PowerShellGuardianBridge.exe")
+Write-Host "PowerShell Guardian build completed successfully" -ForegroundColor Green
