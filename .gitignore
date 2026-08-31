@@ -1,0 +1,12 @@
+build/
+*.log
+*.jsonl
+*.dat
+*.pdb
+*.res
+config/api.key
+config/bridge.key
+config/tunnel.id
+config/security.local.json
+.vs/
+.vscode/

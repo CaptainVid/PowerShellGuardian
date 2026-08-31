@@ -1,0 +1,14 @@
+{
+  "zero_trust": true,
+  "listen_address": "127.0.0.1",
+  "gateway_port": 17654,
+  "session_timeout_minutes": 60,
+  "cleanup_choices_minutes": [30, 60, 720, 1440],
+  "unattended_file_limit": 5,
+  "unattended_file_window_minutes": 5,
+  "suspicious_full_windows": 3,
+  "suspicious_guard_enabled": true,
+  "require_local_approval_for_medium": true,
+  "require_local_approval_for_high": true,
+  "audit_retention_days": 90
+}

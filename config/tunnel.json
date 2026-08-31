@@ -1,0 +1,5 @@
+{
+  "tunnel_id_protected": true,
+  "profile_mode": "sample_mcp_stdio_local",
+  "health_address": "127.0.0.1:17655"
+}

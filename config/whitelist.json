@@ -1,0 +1,5 @@
+{
+  "allowed": ["system_info", "get_status", "read_logs"],
+  "approval_required": ["execute_command", "powershell", "file_write", "install", "delete", "registry", "network_change"],
+  "default": "approval_required"
+}
