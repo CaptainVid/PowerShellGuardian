@@ -2,10 +2,10 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-whitelist = json.loads((ROOT / "config" / "whitelist.json").read_text())
-security = json.loads((ROOT / "config" / "security.json").read_text())
-source = (ROOT / "src" / "PowerShellGuardian.cpp").read_text()
-json_parser = (ROOT / "src" / "JsonLite.h").read_text()
+whitelist = json.loads((ROOT / "config" / "whitelist.json").read_text(encoding="utf-8"))
+security = json.loads((ROOT / "config" / "security.json").read_text(encoding="utf-8"))
+source = (ROOT / "src" / "PowerShellGuardian.cpp").read_text(encoding="utf-8")
+json_parser = (ROOT / "src" / "JsonLite.h").read_text(encoding="utf-8")
 
 assert whitelist["default"] == "approval_required"
 assert set(whitelist["allowed"]) == {"system_info", "get_status", "read_logs"}
@@ -78,7 +78,7 @@ for file_safety in ["CanCreateFiles", "RecordCreatedFiles", "unattended_file_lim
     assert file_safety in source, file_safety
 for job_control in ["CreateTunnelJob", "JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE", "AssignProcessToJobObject", "TerminateJobObject"]:
     assert job_control in source, job_control
-installer = (ROOT / "installer" / "PowerShellGuardian.nsi").read_text()
+installer = (ROOT / "installer" / "PowerShellGuardian.nsi").read_text(encoding="utf-8")
 for full_removal in ['taskkill.exe /F /T /IM PowerShellGuardian.exe', 'RMDir /r "$0\\PowerShellGuardian"', 'RMDir /r "$APPDATA\\PowerShellGuardian"', 'RMDir /r "$LOCALAPPDATA\\PowerShellGuardian"']:
     assert full_removal in installer, full_removal
 print("PowerShell Guardian security contract: PASS")
