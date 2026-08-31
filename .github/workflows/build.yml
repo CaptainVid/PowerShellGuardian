@@ -17,85 +17,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install build dependencies
-        shell: powershell
+      - name: Setup PowerShell
+        shell: pwsh
         run: |
-          choco install mingw nsis -y
+          pwsh --version
 
-          Write-Host "Searching for NSIS..."
-
-          $nsis = Get-ChildItem `
-            "C:\Program Files*" `
-            -Filter "makensis.exe" `
-            -Recurse `
-            -ErrorAction SilentlyContinue |
-            Select-Object -First 1
-
-          if ($nsis) {
-              Write-Host "Found NSIS:"
-              Write-Host $nsis.FullName
-
-              echo $nsis.Directory.FullName | Out-File -FilePath $env:GITHUB_PATH -Append
-          }
-          else {
-              throw "NSIS installation not found"
-          }
-
-
-          Write-Host "Searching for MinGW..."
-
-          $mingw = Get-ChildItem `
-            "C:\ProgramData\chocolatey\lib" `
-            -Directory |
-            Where-Object {$_.Name -like "mingw*"} |
-            Select-Object -First 1
-
-          if ($mingw) {
-              $mingwBin = Join-Path $mingw.FullName "tools\mingw64\bin"
-
-              if (Test-Path $mingwBin) {
-                  Write-Host "Found MinGW:"
-                  Write-Host $mingwBin
-
-                  echo $mingwBin | Out-File -FilePath $env:GITHUB_PATH -Append
-              }
-          }
-
-
-      - name: Verify tools
-        shell: powershell
-        run: |
-          where.exe g++
-          where.exe windres
-          where.exe makensis
-
-          g++ --version
-          windres --version
-          makensis -VERSION
-
-
-      - name: Build PowerShell Guardian
+      - name: Run build script
         shell: pwsh
         run: |
           Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-          .uild.ps1
+          .\build.ps1
 
-
-      - name: Run security tests
+      - name: Run Python security tests
         shell: pwsh
         run: |
+          python --version
           python tests/security_contract_test.py
-
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: PowerShellGuardian-build
-          path: |
-            build/**
-            *.exe
-
 
       - name: Build completed
         run: echo "PowerShell Guardian build completed successfully."
