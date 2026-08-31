@@ -14,43 +14,41 @@ jobs:
     runs-on: windows-latest
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
-
-      - name: Install MinGW
+      - name: Install build dependencies
         shell: powershell
         run: |
-          choco install mingw -y
+          choco install mingw nsis -y
+          refreshenv
 
-
-      - name: Verify build tools
+      - name: Verify tools
         shell: powershell
         run: |
           g++ --version
           windres --version
+          makensis -VERSION
 
-
-      - name: Setup PowerShell
-        shell: pwsh
-        run: |
-          pwsh --version
-
-
-      - name: Run build script
+      - name: Build PowerShell Guardian
         shell: pwsh
         run: |
           Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
           .\build.ps1
 
-
-      - name: Run Python security tests
+      - name: Run security tests
         shell: pwsh
         run: |
-          python --version
           python tests/security_contract_test.py
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: PowerShellGuardian-build
+          path: |
+            build/**
+            *.exe
 
       - name: Build completed
         run: echo "PowerShell Guardian build completed successfully."
