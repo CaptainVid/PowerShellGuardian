@@ -17,22 +17,48 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup PowerShell
-        shell: pwsh
+      - name: Install MinGW
+        shell: powershell
         run: |
-          pwsh --version
+          choco install mingw -y
 
-      - name: Run build script
+      - name: Install NSIS
+        shell: powershell
+        run: |
+          choco install nsis.install -y
+
+          $nsis = Get-ChildItem "C:\Program Files*" -Filter "makensis.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+
+          if (-not $nsis) {
+              throw "NSIS installation failed. makensis.exe not found."
+          }
+
+          echo "NSIS_PATH=$($nsis.FullName)" >> $env:GITHUB_ENV
+          Write-Host $nsis.FullName
+
+      - name: Verify tools
+        shell: powershell
+        run: |
+          g++ --version
+          windres --version
+          & $env:NSIS_PATH -VERSION
+
+      - name: Build PowerShell Guardian
         shell: pwsh
         run: |
           Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-          .\build.ps1
+          .\build.ps1 -MakeNsis $env:NSIS_PATH
 
-      - name: Run Python security tests
+      - name: Run security tests
         shell: pwsh
         run: |
-          python --version
           python tests/security_contract_test.py
 
-      - name: Build completed
-        run: echo "PowerShell Guardian build completed successfully."
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: PowerShellGuardian-build
+          path: |
+            build/**
+            *.exe
