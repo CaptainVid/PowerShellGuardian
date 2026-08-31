@@ -1,356 +1,217 @@
-# PowerShell Guardian
+::: {align="center"}
+`<img src="assets/powershell_guardian_banner.png" width="100%">`{=html}
 
-## Secure ChatGPT MCP Bridge for Windows Automation
+# 🛡️ PowerShell Guardian
 
-PowerShell Guardian is a secure bridge that allows AI assistants such as ChatGPT to communicate with a Windows computer through a controlled PowerShell execution layer.
+## Secure AI Control Layer for Windows
 
-The project creates a secure connection between:
+A secure bridge between AI assistants and Windows computers through
+controlled PowerShell automation and MCP communication.
 
-```
-ChatGPT
-   |
-   |
-OpenAI MCP Tunnel
-   |
-   |
-PowerShell Guardian Gateway
-   |
-   |
-Windows PowerShell
-   |
-   |
-Local Computer
-```
+[![GitHub
+stars](https://img.shields.io/github/stars/CaptainVid/PowerShellGuardian?style=for-the-badge)](https://github.com/CaptainVid/PowerShellGuardian/stargazers)
+[![License](https://img.shields.io/github/license/CaptainVid/PowerShellGuardian?style=for-the-badge)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows-blue?style=for-the-badge)]()
+:::
 
-Instead of giving an AI assistant direct unrestricted access to your computer, PowerShell Guardian introduces a controlled security layer with configurable permissions, command policies, and local execution management.
+# Overview
 
----
+PowerShell Guardian is an open-source security bridge that allows AI
+assistants such as ChatGPT to communicate with Windows computers through
+a controlled PowerShell execution layer.
+
+The project is designed around a simple principle:
+
+**AI should assist your computer, but you should remain in control.**
+
+Instead of providing unrestricted access, PowerShell Guardian introduces
+a controlled gateway between AI systems and Windows automation.
+
+# Architecture
+
+    AI Assistant
+          |
+          |
+     MCP Communication
+          |
+          |
+    OpenAI Secure Tunnel
+          |
+          |
+    PowerShell Guardian Gateway
+          |
+          |
+    Windows PowerShell
+          |
+          |
+    Local Computer
 
 # Features
 
-## 🔐 Secure PowerShell Communication
+## Secure PowerShell Bridge
 
-PowerShell Guardian allows AI assistants to execute approved Windows automation tasks through a controlled PowerShell gateway.
+Execute Windows automation tasks through a controlled security layer.
 
-## 🤖 ChatGPT MCP Integration
+## AI Integration
 
-Connect ChatGPT with your Windows environment using the Model Context Protocol (MCP) architecture.
+Designed for:
 
-## 🖥️ Windows Automation
+-   ChatGPT integrations
+-   MCP compatible assistants
+-   AI automation workflows
 
-Automate:
+## Windows Automation
 
-* File management
-* System tasks
-* PowerShell commands
-* Development workflows
-* Local productivity actions
+Possible use cases:
 
-## 🛡️ Security First Design
+-   System information
+-   File management
+-   Development workflows
+-   Productivity automation
+-   Local computer assistance
 
-PowerShell Guardian includes:
+## Security Design
 
-* Command filtering
-* Local execution control
-* Security policies
-* Audit logging
-* Controlled permissions
+PowerShell Guardian focuses on:
 
-## 🌐 Secure Tunnel Communication
+-   Local-first execution
+-   Permission control
+-   Command filtering
+-   Audit visibility
+-   User ownership
 
-The project uses OpenAI tunnel infrastructure to securely connect your local computer without exposing your machine directly to the public internet.
+# Installation
 
----
+This repository contains the source code.
 
-# Requirements
+The installer is intentionally created locally by the user.
 
-Before installing PowerShell Guardian, you need:
+You have two options:
 
-* Windows 10/11
-* PowerShell
-* OpenAI Platform account
-* ChatGPT account with connector support
-* Internet connection
+1.  Build the installer yourself from source.
+2.  Download an installer from GitHub Releases when available.
 
----
+# Build From Source
 
-# Installation Guide
+## Requirements
 
-## Step 1 — Download PowerShell Guardian
+Install:
 
-Go to the GitHub Releases page:
+-   Windows 10/11
+-   PowerShell
+-   C++ compiler
+-   NSIS Installer System
 
-```
-https://github.com/CaptainVid/PowerShellGuardian/releases
-```
+## Clone Repository
 
-Download:
+``` bash
+git clone https://github.com/CaptainVid/PowerShellGuardian.git
 
-```
-PowerShellGuardian-Setup.exe
-```
-
-Run the installer.
-
-After installation, PowerShell Guardian will be available on your Windows computer.
-
----
-
-# Step 2 — Create Your OpenAI Tunnel
-
-Open:
-
-```
-https://platform.openai.com/settings/organization/tunnels
+cd PowerShellGuardian
 ```
 
-This page manages your OpenAI tunnels.
-
-Click:
-
-```
-Create Tunnel
-```
-
-Create a new tunnel.
-
-Example:
-
-```
-Name:
-My PowerShell Guardian Tunnel
-```
-
-After creation, copy the:
-
-```
-Tunnel ID
-```
-
-It will look similar to:
-
-```
-tunnel_xxxxxxxxxxxxxxxxx
-```
-
-Keep this value safe.
-
----
-
-# Step 3 — Create an OpenAI Runtime API Key
-
-Open:
-
-```
-https://platform.openai.com/settings/organization/api-keys
-```
-
-Create a new API key.
-
-Recommended:
-
-```
-Restricted Key
-```
-
-Give it tunnel permissions required for runtime usage.
-
-Do NOT use an administrator key for the running service.
-
-The runtime key is used by the tunnel client to authenticate and communicate with the OpenAI tunnel service.
-
-Copy your API key.
-
-Example:
-
-```
-sk-proj-xxxxxxxxxxxxxxxx
-```
-
-Keep it private.
-
-Never upload it to GitHub.
-
----
-
-# Step 4 — Configure PowerShell Guardian
-
-Open the installed PowerShell Guardian folder.
-
-Locate:
-
-```
-config/tunnel.json
-```
-
-Edit:
-
-```json
-{
-    "tunnel_id": "YOUR_TUNNEL_ID",
-    "api_key": "YOUR_API_KEY"
-}
-```
-
-Replace:
-
-```
-YOUR_TUNNEL_ID
-```
-
-with your OpenAI Tunnel ID.
-
-Replace:
-
-```
-YOUR_API_KEY
-```
-
-with your runtime API key.
-
-Save the file.
-
----
-
-# Step 5 — Start PowerShell Guardian
+## Build Application
 
 Run:
 
+``` powershell
+.\build.ps1
 ```
-PowerShell Guardian
+
+## Create Installer
+
+Install NSIS:
+
+https://nsis.sourceforge.io/
+
+Then:
+
+``` powershell
+makensis installer/PowerShellGuardian.nsi
 ```
 
-The application will:
+Your installer will be generated locally.
 
-1. Start the local security gateway
-2. Start the tunnel connection
-3. Connect your Windows computer with OpenAI MCP services
-4. Wait for ChatGPT communication
+# OpenAI Tunnel Configuration
 
-Keep PowerShell Guardian running while using ChatGPT.
+PowerShell Guardian requires an OpenAI Tunnel connection.
 
-The tunnel client must remain active for ChatGPT connector communication.
+## Create Tunnel
 
----
+Open:
 
-# Step 6 — Connect ChatGPT
+https://platform.openai.com/settings/organization/tunnels
+
+Create a new tunnel and copy your Tunnel ID.
+
+Example:
+
+    tunnel_xxxxxxxxxxxxx
+
+Keep this value private.
+
+## Create API Key
+
+Open:
+
+https://platform.openai.com/settings/organization/api-keys
+
+Create a dedicated API key.
+
+Example:
+
+    sk-proj-xxxxxxxxxxxxxxxx
+
+Never upload API keys to GitHub.
+
+# Configure PowerShell Guardian
+
+Edit:
+
+    config/tunnel.json
+
+Add:
+
+``` json
+{
+  "tunnel_id": "YOUR_TUNNEL_ID",
+  "api_key": "YOUR_API_KEY"
+}
+```
+
+Replace the placeholders with your own values.
+
+# Start PowerShell Guardian
+
+Launch the application.
+
+It will:
+
+1.  Start the local gateway.
+2.  Start the secure tunnel.
+3.  Connect the AI communication layer.
+4.  Wait for ChatGPT communication.
+
+Keep it running while using ChatGPT.
+
+# Connect With ChatGPT
 
 Open ChatGPT.
 
 Go to:
 
-```
-Settings
-```
+    Settings
 
 Then:
 
-```
-Apps / Connectors
-```
+    Apps / Connectors
 
-Choose:
+Add a new connector and configure the MCP/tunnel connection.
 
-```
-Create Connector
-```
+Enter your Tunnel ID and save.
 
-or:
-
-```
-Add Connector
-```
-
-Select:
-
-```
-Connection Type:
-Tunnel
-```
-
-Enter your:
-
-```
-Tunnel ID
-```
-
-Save the connector.
-
-ChatGPT will now be able to communicate with your local PowerShell Guardian instance through the secure tunnel.
-
----
-
-# Using PowerShell Guardian
-
-Once connected, you can ask ChatGPT things like:
-
-```
-Show my Windows system information
-```
-
-```
-Create a folder called Projects
-```
-
-```
-Check running applications
-```
-
-```
-Run my development environment
-```
-
-All actions are processed through the PowerShell Guardian security layer.
-
----
-
-# Security Model
-
-PowerShell Guardian follows these principles:
-
-## Local First
-
-Commands are executed locally on your own computer.
-
-## No Embedded Secrets
-
-API keys and credentials should never be stored inside source code.
-
-## Controlled Execution
-
-Commands are filtered through security policies before execution.
-
-## User Ownership
-
-Your computer remains under your control.
-
----
-
-# Project Structure
-
-```
-PowerShellGuardian
-
-├── src/
-│   Source code
-
-├── config/
-│   Security configuration
-
-├── installer/
-│   Windows installer
-
-├── mcp/
-│   MCP connector configuration
-
-├── tunnel/
-│   External tunnel components
-
-└── tests/
-    Security tests
-```
-
----
+Your ChatGPT instance can now communicate with your Windows computer
+through PowerShell Guardian.
 
 # Troubleshooting
 
@@ -358,76 +219,88 @@ PowerShellGuardian
 
 Check:
 
-1. PowerShell Guardian is running
-2. Tunnel ID is correct
-3. API key is valid
-4. Internet connection works
+-   PowerShell Guardian is running.
+-   Tunnel ID is correct.
+-   API key is valid.
+-   Internet connection works.
 
----
+## Build problems
 
-## Tunnel does not appear in ChatGPT
+Check:
 
-Verify:
+-   Compiler installation.
+-   PowerShell permissions.
+-   NSIS installation.
 
-* The tunnel exists
-* Your account has permission to use the tunnel
-* The connector is configured with the correct Tunnel ID
+# Need Help?
 
-A tunnel existing in OpenAI Platform does not automatically guarantee it appears in ChatGPT if permissions or workspace settings are incorrect.
+## Ask an AI Assistant
 
----
+You can ask ChatGPT or another AI assistant for help.
 
-## API Key Error
+Include:
 
-Create a new runtime API key.
+-   Error messages
+-   Screenshots
+-   Build output
+-   Windows version
 
-Do not use:
+Never share:
 
-* expired keys
-* deleted keys
-* admin keys for runtime operation
+-   API keys
+-   Tokens
+-   Private credentials
 
----
+## Contact Developer
+
+Open an issue:
+
+https://github.com/CaptainVid/PowerShellGuardian/issues
+
+Include the problem description and steps already attempted.
+
+# Project Structure
+
+    PowerShellGuardian
+
+    ├── src/
+    ├── installer/
+    ├── config/
+    ├── mcp/
+    ├── tunnel/
+    ├── tests/
+    └── assets/
 
 # Third Party Components
 
-PowerShell Guardian uses external components:
+This project uses external components:
 
-* OpenAI tunnel-client
-* Cloudflare cloudflared
+-   OpenAI tunnel-client
+-   Cloudflare cloudflared
 
 See:
 
-```
-THIRD_PARTY_NOTICES.md
-```
+    THIRD_PARTY_NOTICES.md
 
 for licensing information.
 
----
-
 # Contributing
 
-Contributions are welcome.
+Contributions and security reviews are welcome.
 
-Before submitting security-related issues, please read:
+Please read:
 
-```
-SECURITY.md
-```
+    SECURITY.md
 
----
+before reporting security issues.
 
 # License
 
 See:
 
-```
-LICENSE
-```
+    LICENSE
 
----
-
-# About
-
-PowerShell Guardian provides a secure way to connect AI assistants with Windows automation while keeping control, transparency, and security in the hands of the user.
+::: {align="center"}
+PowerShell Guardian\
+Secure AI communication with Windows.
+:::
