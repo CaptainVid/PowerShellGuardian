@@ -17,38 +17,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install build dependencies
-        shell: powershell
+      - name: Setup PowerShell
+        shell: pwsh
         run: |
-          choco install mingw nsis -y
-          refreshenv
+          pwsh --version
 
-      - name: Verify tools
-        shell: powershell
-        run: |
-          g++ --version
-          windres --version
-          makensis -VERSION
-
-      - name: Build PowerShell Guardian
+      - name: Run build script
         shell: pwsh
         run: |
           Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
           .\build.ps1
 
-      - name: Run security tests
+      - name: Run Python security tests
         shell: pwsh
         run: |
+          python --version
           python tests/security_contract_test.py
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: PowerShellGuardian-build
-          path: |
-            build/**
-            *.exe
 
       - name: Build completed
         run: echo "PowerShell Guardian build completed successfully."
