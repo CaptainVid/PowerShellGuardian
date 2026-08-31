@@ -1,12 +1,16 @@
-::: {align="center"}
-`<img src="assets/powershell_guardian_banner.png" width="100%">`{=html}
+<div align="center">
 
-# 🛡️ PowerShell Guardian
+<img src="assets/powershell_guardian_banner.png" width="100%" alt="PowerShell Guardian Banner">
 
-## Secure AI Control Layer for Windows
+<h1>🛡️ PowerShell Guardian</h1>
 
-A secure bridge between AI assistants and Windows computers through
-controlled PowerShell automation and MCP communication.
+<h3>Secure AI Control Layer for Windows</h3>
+
+<p>
+A secure bridge between AI assistants and Windows computers through controlled PowerShell automation and MCP communication.
+</p>
+
+</div>
 
 [![GitHub
 stars](https://img.shields.io/github/stars/CaptainVid/PowerShellGuardian?style=for-the-badge)](https://github.com/CaptainVid/PowerShellGuardian/stargazers)
