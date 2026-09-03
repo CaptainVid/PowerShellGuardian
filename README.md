@@ -47,15 +47,15 @@ The project is designed for users who want useful AI automation without removing
 ## How it works
 
 ```mermaid
-flowchart TD
-    AI["ChatGPT or MCP client"] --> TUNNEL["Secure tunnel"]
-    TUNNEL --> BRIDGE["PowerShell Guardian MCP bridge"]
-    BRIDGE --> GATEWAY["Local security gateway — 127.0.0.1"]
-    GATEWAY --> POLICY{"Session and policy checks"}
-    POLICY -->|Approved| WINDOWS["Windows / PowerShell"]
-    POLICY -->|Approval required| USER["Local Command Center"]
-    USER -->|Approve| WINDOWS
-    USER -->|Reject| BLOCKED["Blocked and audited"]
+graph TD;
+    A[ChatGPT or MCP client] --> B[Secure MCP Tunnel];
+    B --> C[PowerShell Guardian bridge];
+    C --> D[Local security gateway];
+    D --> E{Policy check};
+    E -->|Allowed| F[Windows PowerShell];
+    E -->|Needs approval| G[Local Command Center];
+    G -->|Approve| F;
+    G -->|Reject| H[Blocked and audited];
 ```
 
 The MCP bridge never executes commands directly. It forwards requests to the local gateway, which checks the bridge secret, session token, device binding, expiry, access mode, whitelist, deletion rules, and file-creation policy before an action can run.
@@ -108,6 +108,54 @@ If an intervening window is not full, or one or more windows are skipped, the co
 | `command_status` | Poll an asynchronous command and retrieve its result. |
 
 ## Installation
+
+### Create the OpenAI Tunnel ID and runtime API key
+
+PowerShell Guardian needs two values from the same OpenAI Platform organization:
+
+- a **Tunnel ID**, which identifies the private Secure MCP Tunnel;
+- a dedicated **runtime API key**, which allows the bundled `tunnel-client` to connect to that tunnel.
+
+#### 1. Select the correct OpenAI organization
+
+1. Sign in to the [OpenAI Platform](https://platform.openai.com/).
+2. Use the organization selector to choose the organization that will own the tunnel.
+3. Confirm that your account has the required organization-level tunnel permissions:
+   - **Tunnels Read + Manage** to create or edit a tunnel;
+   - **Tunnels Read + Use** to run `tunnel-client` and select the tunnel in ChatGPT.
+
+If the Tunnels page says that access is required, ask the Platform organization owner or RBAC administrator to grant the appropriate role. A new role assignment can take up to 30 minutes to propagate.
+
+#### 2. Create and copy the Tunnel ID
+
+1. Open [OpenAI Platform → Organization settings → Tunnels](https://platform.openai.com/settings/organization/tunnels).
+2. Select **Create tunnel**.
+3. Enter a clear name, such as `PowerShell Guardian - My PC`, and an optional description.
+4. Associate the tunnel with the Platform organization that owns it.
+5. If you will use the tunnel from ChatGPT, also associate the ChatGPT workspace in which you will create the app. A tunnel associated only with a Platform organization may not appear in a separate ChatGPT workspace.
+6. Save the tunnel.
+7. Copy the generated ID. It has this format:
+
+```text
+tunnel_0123456789abcdef0123456789abcdef
+```
+
+This is the value to enter in PowerShell Guardian through **Change Tunnel ID**. Copy the real ID exactly, without quotation marks or extra spaces.
+
+#### 3. Create a dedicated runtime API key
+
+1. While the same Platform organization is selected, open [OpenAI Platform → API keys](https://platform.openai.com/api-keys).
+2. Select **Create new secret key**.
+3. Give the key a recognizable name, such as `PowerShell Guardian Runtime`.
+4. Select restricted permissions when that option is available.
+5. Grant the runtime key **Tunnels Read + Use**. The runtime key does not need **Tunnels Manage** merely to run an existing tunnel.
+6. Create the key and copy it immediately. OpenAI displays the full secret only once.
+7. Launch PowerShell Guardian and paste the key into the API-key prompt. The application protects it locally with Windows DPAPI.
+
+> [!CAUTION]
+> Never place the real API key or Tunnel ID in `config/tunnel.json`, source code, screenshots, issues, commits, or chat messages. If an API key is exposed, revoke it in the Platform API-key page and create a replacement.
+
+The [official OpenAI Secure MCP Tunnel guide](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels) explains the tunnel architecture, permissions, workspace associations, and network requirements.
 
 ### Recommended: use the installer
 
