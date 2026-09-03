@@ -3,6 +3,8 @@
   "listen_address": "127.0.0.1",
   "gateway_port": 17654,
   "session_timeout_minutes": 60,
+  "session_request_limit": 10,
+  "session_request_window_minutes": 5,
   "cleanup_choices_minutes": [30, 60, 720, 1440],
   "unattended_file_limit": 5,
   "unattended_file_window_minutes": 5,

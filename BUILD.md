@@ -1,4 +1,4 @@
-# Build PowerShell Guardian 1.1.1
+# Build PowerShell Guardian 1.1.4
 
 ## Requirements
 
@@ -36,6 +36,8 @@ Run the source/security contract with Python 3:
 
 ```powershell
 python tests\security_contract_test.py
+python tests\file_safety_logic_test.py
+python tests\session_lifecycle_test.py
 ```
 
 The platform-independent JSON parser regression test can be compiled with any C++17 compiler:
@@ -44,5 +46,7 @@ The platform-independent JSON parser regression test can be compiled with any C+
 g++ -std=c++17 tests\jsonlite_test.cpp -o build\jsonlite_test.exe
 .\build\jsonlite_test.exe
 ```
+
+`file_safety_logic_test.py` models adjacent full windows, partial-window and skipped-window resets, inactive locked-session limits, and read operations that must not consume the quota. `session_lifecycle_test.py` verifies that lock-mode changes preserve the session identity/token, refresh activity and retain all command states except `SUCCESS` and `REJECTED` during history cleanup.
 
 Never build a release from a directory containing copied `ProgramData\PowerShellGuardian` content, API keys, Tunnel IDs, sessions or production logs.

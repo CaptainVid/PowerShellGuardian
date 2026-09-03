@@ -1,9 +1,9 @@
 {
   "mcpServers": {
     "powershell-guardian": {
-      "command": "%PROGRAMFILES%\\PowerShellGuardian\\PowerShellGuardianBridge.exe",
+      "command": "C:\\Program Files\\PowerShellGuardian\\PowerShellGuardianBridge.exe",
       "args": [],
-      "note": "The bridge requires MOMENTUM_BRIDGE_KEY supplied only by the local gateway/tunnel manager; direct launch is denied."
+      "note": "The bridge requires POWERSHELL_GUARDIAN_BRIDGE_KEY supplied only by the local gateway/tunnel manager; direct launch is denied."
     }
   }
 }

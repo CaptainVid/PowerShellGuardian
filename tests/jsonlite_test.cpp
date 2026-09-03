@@ -5,9 +5,9 @@
 #include <string>
 
 int main() {
-  using powershellguardian_json::RawField;
-  using powershellguardian_json::ScalarField;
-  using powershellguardian_json::StringField;
+  using powershell_guardian_json::RawField;
+  using powershell_guardian_json::ScalarField;
+  using powershell_guardian_json::StringField;
 
   const std::string call = R"JSON({"jsonrpc":"2.0","id":"call-7","method":"tools/call","params":{"arguments":{"session_token":"TOKEN-ABC","script":"Write-Output \"ok\"\nGet-Date"},"name":"powershell"}})JSON";
   std::string params, arguments, name, token, id;
@@ -36,10 +36,10 @@ int main() {
 
   const std::string whitelist = R"JSON({"allowed":["system_info","get_status","read_logs"],"default":"approval_required"})JSON";
   std::vector<std::string> allowed;
-  assert(powershellguardian_json::StringArrayField(whitelist, "allowed", allowed));
+  assert(powershell_guardian_json::StringArrayField(whitelist, "allowed", allowed));
   assert(allowed.size() == 3);
   assert(allowed[0] == "system_info");
   assert(allowed[2] == "read_logs");
 
-  std::cout << "PowerShellGuardian JSON/MCP protocol regression tests: PASS\n";
+  std::cout << "PowerShell Guardian JSON/MCP protocol regression tests: PASS\n";
 }

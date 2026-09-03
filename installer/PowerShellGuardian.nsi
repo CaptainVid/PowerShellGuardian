@@ -6,7 +6,7 @@ RequestExecutionLevel admin
 !include "x64.nsh"
 
 !define PRODUCT "PowerShell Guardian"
-!define VERSION "1.1.1"
+!define VERSION "1.1.4"
 Name "${PRODUCT} ${VERSION}"
 OutFile "..\build\PowerShellGuardianSetup.exe"
 InstallDir "$PROGRAMFILES64\PowerShellGuardian"
@@ -28,6 +28,17 @@ InstallDirRegKey HKLM "Software\PowerShellGuardian" "InstallDir"
 Section "PowerShell Guardian" SEC_MAIN
   SetRegView 64
   SetShellVarContext all
+  ; Prevent a mixed old/new bridge pair during an in-place upgrade.
+  nsExec::ExecToLog 'sc.exe stop PowerShellGuardianGateway'
+  nsExec::ExecToLog 'sc.exe delete PowerShellGuardianGateway'
+  ; Stop the pre-rename service/processes so the upgrade cannot leave two gateways on the same port.
+  nsExec::ExecToLog 'sc.exe stop MomentumSecureGateway'
+  nsExec::ExecToLog 'sc.exe delete MomentumSecureGateway'
+  nsExec::ExecToLog 'taskkill.exe /F /T /IM PowerShellGuardian.exe'
+  nsExec::ExecToLog 'taskkill.exe /F /T /IM PowerShellGuardianBridge.exe'
+  nsExec::ExecToLog 'taskkill.exe /F /T /IM MomentumSecure.exe'
+  nsExec::ExecToLog 'taskkill.exe /F /T /IM MomentumSecureBridge.exe'
+  Sleep 1000
   SetOutPath "$INSTDIR"
   File "..\build\PowerShellGuardian.exe"
   File "..\build\PowerShellGuardianBridge.exe"
@@ -48,6 +59,12 @@ Section "PowerShell Guardian" SEC_MAIN
   ExpandEnvStrings $0 $0
   StrCmp $0 "" 0 +2
     StrCpy $0 "$PROGRAMFILES64\..\ProgramData"
+  ; One-time, same-volume migration preserves DPAPI secrets, sessions and local policy.
+  ; Existing PowerShellGuardian data always wins; no files are overwritten or merged.
+  IfFileExists "$0\PowerShellGuardian\." data_migration_done
+  IfFileExists "$0\MomentumSecure\." 0 data_migration_done
+  Rename "$0\MomentumSecure" "$0\PowerShellGuardian"
+data_migration_done:
   CreateDirectory "$0\PowerShellGuardian\config"
   CreateDirectory "$0\PowerShellGuardian\logs"
   CreateDirectory "$0\PowerShellGuardian\data"
@@ -64,15 +81,14 @@ Section "PowerShell Guardian" SEC_MAIN
   WriteRegStr HKLM "Software\PowerShellGuardian" "InstallDir" "$INSTDIR"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PowerShellGuardian" "DisplayName" "PowerShell Guardian"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PowerShellGuardian" "DisplayVersion" "${VERSION}"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PowerShellGuardian" "Publisher" "PowerShellGuardian"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PowerShellGuardian" "Publisher" "PowerShell Guardian"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PowerShellGuardian" "UninstallString" '"$INSTDIR\Uninstall.exe"'
 
   CreateDirectory "$SMPROGRAMS\PowerShell Guardian"
   CreateShortcut "$SMPROGRAMS\PowerShell Guardian\PowerShell Guardian.lnk" "$INSTDIR\PowerShellGuardian.exe"
   CreateShortcut "$DESKTOP\PowerShell Guardian.lnk" "$INSTDIR\PowerShellGuardian.exe"
+  CreateShortcut "$SMSTARTUP\PowerShell Guardian.lnk" "$INSTDIR\PowerShellGuardian.exe"
 
-  nsExec::ExecToLog 'sc.exe stop PowerShellGuardianGateway'
-  nsExec::ExecToLog 'sc.exe delete PowerShellGuardianGateway'
   nsExec::ExecToLog 'sc.exe create PowerShellGuardianGateway binPath= "$\"$INSTDIR\PowerShellGuardian.exe$\" --service" start= demand DisplayName= "PowerShell Guardian Gateway"'
   nsExec::ExecToLog 'sc.exe description PowerShellGuardianGateway "Zero Trust local gateway. Headless mode blocks commands requiring local approval."'
 

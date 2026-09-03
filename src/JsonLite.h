@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace powershellguardian_json {
+namespace powershell_guardian_json {
 
 inline void SkipWhitespace(const std::string& json, size_t& pos) {
   while (pos < json.size() && std::isspace(static_cast<unsigned char>(json[pos]))) ++pos;
@@ -206,4 +206,4 @@ inline bool StringArrayField(const std::string& object, const std::string& key,
   return false;
 }
 
-}  // namespace powershellguardian_json
+}  // namespace powershell_guardian_json

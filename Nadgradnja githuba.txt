@@ -1,0 +1,32 @@
+CODE_OF_CONDUCT.md
+izboljšan SECURITY.md
+SUPPORT.md + FAQ
+Issue templates
+GitHub Discussions
+Release avtomatizacija (da ob tagu sam naredi installer)
+mogoče še:
+GitHub Pages dokumentacija
+logo/banner za repo
+boljši About opis in tags za iskanje
+
+
+2. CODE_OF_CONDUCT.md
+
+Standard za open-source projekte.
+
+3. SECURITY.md izboljšava
+
+Da jasno napiše:
+
+kako prijaviti ranljivost
+da se ne objavlja javno z API ključi
+4. GitHub Discussions
+
+Za vprašanja uporabnikov:
+
+Discussions
+├── General
+├── Help
+├── Ideas
+
+To prepreči, da bi vse šlo v Issues.
