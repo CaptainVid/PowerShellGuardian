@@ -1,6 +1,6 @@
 param(
     [string]$Cxx = "x86_64-w64-mingw32-g++",
-    [string]$WindRes = "x86_64-w64-mingw32-windres",
+    [string]$WindRes = "windres",
     [string]$MakeNsis = "makensis"
 )
 
